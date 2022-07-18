@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 
-
 //....................Controllers
 const controller = require("./controller")
 
@@ -9,9 +8,7 @@ const controller = require("./controller")
 router.post("/url/shorten", controller.createurl);
 
 //...................Get List Of /:urlCode
- // router.get("/:urlCode", controller.geturl);
-
-// 
+ router.get("/:urlCode", controller.redirectUrl);
 
 module.exports = router;
 
