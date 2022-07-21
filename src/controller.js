@@ -39,8 +39,8 @@ exports.createurl = async function (req, res) {
         if (!validUrl.isUri(data.longUrl)) {
             return res.status(400).send({ status: false, message: "longUrl is invalid" })
         }
-        
-        checkUniqueUrl = await urlModel.findOne({ longUrl: data.longUrl })
+
+        checkUniqueUrl = await urlModel.findOne({ longUrl: data.longUrl }).select({_id: 0, __v: 0,});
         if (checkUniqueUrl) {
             return res.status(400).send({ status: false, message: "link is already shorted", data: checkUniqueUrl })
         }
@@ -52,8 +52,7 @@ exports.createurl = async function (req, res) {
         data.urlCode = urlCode
 
         let savedData = await urlModel.create(data);
-        console.log(data)
-        res.status(201).send({ status: true, data: savedData});
+        res.status(201).send({ status: true, data: savedData });
     }
     catch (error) {
         return res.status(500).send({ status: false, msg: error.message })
