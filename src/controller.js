@@ -48,11 +48,16 @@ exports.createurl = async function (req, res) {
         const urlCode = shortId.generate()
         const shortUrl = fixUrl + urlCode
 
-        data.shortUrl = shortUrl
         data.urlCode = urlCode
+        data.shortUrl = shortUrl
+        
 
         let savedData = await urlModel.create(data);
-        res.status(201).send({ status: true, data: savedData });
+        savedData = savedData.toObject()
+        delete savedData.__v
+        delete savedData._id
+        console.log(savedData)
+        res.status(201).send({ status: true, data: savedData});
     }
     catch (error) {
         return res.status(500).send({ status: false, msg: error.message })
@@ -85,3 +90,7 @@ exports.redirectUrl = async function (req, res) {
         return res.status(500).send({ status: false, msg: error.message })
     }
 };
+
+
+
+// jai bhole ki
