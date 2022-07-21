@@ -12,10 +12,15 @@ mongoose.connect("mongodb+srv://wishall:vishal@atlascluster.p9u9uvd.mongodb.net/
 })
 .then( () => console.log("MongoDb is connected"))
 .catch ( err => console.log(err) )
- 
+
 
 
 app.use('/', route);
+
+app.use('*',(req,res)=>{
+    return res.status(404).send({status:false,message:"page not found"})
+})
+
 
 
 app.listen(process.env.PORT || 3000, function () {

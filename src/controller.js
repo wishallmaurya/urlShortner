@@ -6,6 +6,7 @@ const redis = require("redis");
 const { promisify } = require("util");
 
 
+
 const redisClient = redis.createClient(
     11501,
     "redis-11501.c212.ap-south-1-1.ec2.cloud.redislabs.com",
@@ -50,7 +51,7 @@ exports.createurl = async function (req, res) {
         data.shortUrl = shortUrl
         data.urlCode = urlCode
 
-        let savedData = await await urlModel.create(data).select({_id: 0, __v: 0,});
+        let savedData = await urlModel.create(data);
         res.status(201).send({ status: true, data: savedData });
     }
     catch (error) {
@@ -64,19 +65,21 @@ exports.redirectUrl = async function (req, res) {
         let chkUrlCode = JSON.parse(chkUrlCode1);
         // console.log(chkUrlCode)
 
-        if (chkUrlCode) {
-            return res.redirect(302,chkUrlCode.longUrl)
-        }
-        else {
-            let profile = await urlModel.findOne({urlCode:urlCode});
-            console.log(profile)
-            await SET_ASYNC(`${req.params.urlCode}`, JSON.stringify(profile))
-            console.log(profile.longUrl)
-            res.redirect(302,profile.longUrl)
-        }
-        // else {
-        //     return res.status(404).send({ status: false, message: "Url Not Found!" })
-        // }
+            if (chkUrlCode) {
+                return res.redirect(302,chkUrlCode.longUrl)
+            }
+            else {
+                var profile = await urlModel.findOne({urlCode:urlCode});
+                console.log(profile)
+                if (!profile){
+                    return res.status(404).send({ status: false, message: "Url Not Found!" })
+                }
+                await SET_ASYNC(`${req.params.urlCode}`, JSON.stringify(profile))
+                console.log(profile.longUrl)
+                res.redirect(302,profile.longUrl)
+                
+            }
+
     }
     catch (error) {
         return res.status(500).send({ status: false, msg: error.message })
