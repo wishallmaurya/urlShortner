@@ -4,6 +4,7 @@ const shortId = require('shortid');
 const redis = require("redis");
 
 const { promisify } = require("util");
+const { profile } = require('console');
 
 
 const redisClient = redis.createClient(
@@ -38,7 +39,7 @@ exports.createurl = async function (req, res) {
         if (!validUrl.isUri(data.longUrl)) {
             return res.status(400).send({ status: false, message: "longUrl is invalid" })
         }
-
+        
         checkUniqueUrl = await urlModel.findOne({ longUrl: data.longUrl })
         if (checkUniqueUrl) {
             return res.status(400).send({ status: false, message: "link is already shorted", data: checkUniqueUrl })
@@ -51,7 +52,8 @@ exports.createurl = async function (req, res) {
         data.urlCode = urlCode
 
         let savedData = await urlModel.create(data);
-        res.status(201).send({ status: true, data: savedData });
+        console.log(data)
+        res.status(201).send({ status: true, data: savedData});
     }
     catch (error) {
         return res.status(500).send({ status: false, msg: error.message })
@@ -64,19 +66,21 @@ exports.redirectUrl = async function (req, res) {
         let chkUrlCode = JSON.parse(chkUrlCode1);
         // console.log(chkUrlCode)
 
-        if (chkUrlCode) {
-            return res.redirect(302,chkUrlCode.longUrl)
-        }
-        else {
-            let profile = await urlModel.findOne({urlCode:urlCode});
-            console.log(profile)
-            await SET_ASYNC(`${req.params.urlCode}`, JSON.stringify(profile))
-            console.log(profile.longUrl)
-            res.redirect(302,profile.longUrl)
-        }
-        // else {
-        //     return res.status(404).send({ status: false, message: "Url Not Found!" })
-        // }
+            if (chkUrlCode) {
+                return res.redirect(302,chkUrlCode.longUrl)
+            }
+            else {
+                var profile = await urlModel.findOne({urlCode:urlCode});
+                console.log(profile)
+                if (!profile){
+                    return res.status(404).send({ status: false, message: "Url Not Found!" })
+                }
+                await SET_ASYNC(`${req.params.urlCode}`, JSON.stringify(profile))
+                console.log(profile.longUrl)
+                res.redirect(302,profile.longUrl)
+                
+            }
+
     }
     catch (error) {
         return res.status(500).send({ status: false, msg: error.message })
