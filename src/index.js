@@ -18,7 +18,7 @@ mongoose.connect("mongodb+srv://wishall:vishal@atlascluster.p9u9uvd.mongodb.net/
 app.use('/', route);
 
 app.use('*',(req,res)=>{
-    return res.status(404).send({status:false,message:"page not found"})
+    return res.status(404).send({status:false,message:"write proper url"})
 })
 
 
