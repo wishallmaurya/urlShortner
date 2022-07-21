@@ -1,11 +1,9 @@
 const urlModel = require('./model')
-const validUrl = require('valid-url');
+const isUrlValid = require('url-validation');
 const shortId = require('shortid');
 const redis = require("redis");
 
 const { promisify } = require("util");
-// const { profile } = require('console');
-
 
 const redisClient = redis.createClient(
     11501,
@@ -36,13 +34,14 @@ exports.createurl = async function (req, res) {
         if (!isValid(data.longUrl)) {
             return res.status(400).send({ status: false, message: "write your longUrl its mandatory" })
         }
-        if (!validUrl.isUri(data.longUrl)) {
+        
+        if (!isUrlValid(data.longUrl)) {
             return res.status(400).send({ status: false, message: "longUrl is invalid" })
         }
 
         checkUniqueUrl = await urlModel.findOne({ longUrl: data.longUrl }).select({_id: 0, __v: 0,});
         if (checkUniqueUrl) {
-            return res.status(400).send({ status: false, message: "link is already shorted", data: checkUniqueUrl })
+            return res.status(200).send({ status: false, message: "link is already shorted", data: checkUniqueUrl })
         }
         const fixUrl = "http://localhost:3000/"
         const urlCode = shortId.generate()
@@ -72,7 +71,7 @@ exports.redirectUrl = async function (req, res) {
           } else {
               let newURL = await urlModel.findOne({ urlCode: urlCode })
                if (!newURL) return res.status(404).send({ status: false, msg: 'longUrl not found' })
-               console.log(newURL)
+               
               await SET_ASYNC(`${urlCode}`, JSON.stringify(newURL.longUrl))
               res.redirect(302, newURL.longUrl)
           }
