@@ -30,55 +30,58 @@ const isValid = function (value) {
 exports.createurl = async function (req, res) {
     try {
         let data = req.body;
+        if (Object.keys(data).length==0) {
+            return res.status(400).send({ status: false, message: "Body can not be empty" })
+        }
 
         if (!isValid(data.longUrl)) {
             return res.status(400).send({ status: false, message: "write your longUrl its mandatory" })
         }
-        
-        if (!isUrlValid(data.longUrl)) {
+
+        if (!isUrlValid(data.longUrl.trim())) {
             return res.status(400).send({ status: false, message: "longUrl is invalid" })
         }
 
-        checkUniqueUrl = await urlModel.findOne({ longUrl: data.longUrl }).select({_id: 0, __v: 0,});
+        checkUniqueUrl = await urlModel.findOne({ longUrl: data.longUrl }).select({ _id: 0, __v: 0, });
         if (checkUniqueUrl) {
             return res.status(200).send({ status: false, message: "link is already shorted", data: checkUniqueUrl })
         }
         const fixUrl = "http://localhost:3000/"
-        const urlCode = shortId.generate()
+        const urlCode = shortId.generate().toLowerCase()
         const shortUrl = fixUrl + urlCode
 
         data.urlCode = urlCode
         data.shortUrl = shortUrl
-        
+
 
         let savedData = await urlModel.create(data);
         savedData = savedData.toObject()
         delete savedData.__v
         delete savedData._id
         console.log(savedData)
-        res.status(201).send({ status: true, data: savedData});
+        res.status(201).send({ status: true, data: savedData });
     }
     catch (error) {
         return res.status(500).send({ status: false, msg: error.message })
     }
 };
 exports.redirectUrl = async function (req, res) {
-      try {
-          urlCode = req.params.urlCode
-          let url = await GET_ASYNC(`${urlCode}`)
-          if (url) {
-              res.redirect(302, JSON.parse(url))
-          } else {
-              let newURL = await urlModel.findOne({ urlCode: urlCode })
-               if (!newURL) return res.status(404).send({ status: false, msg: 'longUrl not found' })
-               
-              await SET_ASYNC(`${urlCode}`, JSON.stringify(newURL.longUrl))
-              res.redirect(302, newURL.longUrl)
-          }
-      }
-      catch (error) {
-          res.status(500).send({ status: false, msg: error.message })
-      }
-  }
+    try {
+        urlCode = req.params.urlCode
+        let url = await GET_ASYNC(`${urlCode}`)
+        if (url) {
+            res.redirect(302, JSON.parse(url))
+        } else {
+            let newURL = await urlModel.findOne({ urlCode: urlCode })
+            if (!newURL) return res.status(404).send({ status: false, msg: 'longUrl not found' })
+
+            await SET_ASYNC(`${urlCode}`, JSON.stringify(newURL.longUrl))
+            res.redirect(302, newURL.longUrl)
+        }
+    }
+    catch (error) {
+        res.status(500).send({ status: false, msg: error.message })
+    }
+}
 
 
