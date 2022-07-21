@@ -4,7 +4,7 @@ const shortId = require('shortid');
 const redis = require("redis");
 
 const { promisify } = require("util");
-const { profile } = require('console');
+// const { profile } = require('console');
 
 
 const redisClient = redis.createClient(
@@ -86,3 +86,6 @@ exports.redirectUrl = async function (req, res) {
         return res.status(500).send({ status: false, msg: error.message })
     }
 };
+
+
+// vaishnavi
