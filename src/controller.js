@@ -47,7 +47,7 @@ exports.createurl = async function (req, res) {
         const fixUrl = "http://localhost:3000/"
         const urlCode = shortId.generate()
         const shortUrl = fixUrl + urlCode
-        
+
         data.urlCode = urlCode
         data.shortUrl = shortUrl
         
