@@ -83,7 +83,3 @@ exports.redirectUrl = async function (req, res) {
   }
 
 
-// jai bhole ki
-
-
-// vaishnavi sharma..
