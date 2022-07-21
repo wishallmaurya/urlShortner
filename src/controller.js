@@ -48,43 +48,42 @@ exports.createurl = async function (req, res) {
         const urlCode = shortId.generate()
         const shortUrl = fixUrl + urlCode
 
-        data.shortUrl = shortUrl
         data.urlCode = urlCode
+        data.shortUrl = shortUrl
+        
 
         let savedData = await urlModel.create(data);
-        res.status(201).send({ status: true, data: savedData });
+        savedData = savedData.toObject()
+        delete savedData.__v
+        delete savedData._id
+        console.log(savedData)
+        res.status(201).send({ status: true, data: savedData});
     }
     catch (error) {
         return res.status(500).send({ status: false, msg: error.message })
     }
 };
 exports.redirectUrl = async function (req, res) {
-    try {
-        let {urlCode} = req.params.urlCode
-        const chkUrlCode1 = await GET_ASYNC(`${req.params.urlCode}`)
-        let chkUrlCode = JSON.parse(chkUrlCode1);
-        // console.log(chkUrlCode)
-
-            if (chkUrlCode) {
-                return res.redirect(302,chkUrlCode.longUrl)
-            }
-            else {
-                var profile = await urlModel.findOne({urlCode:urlCode});
-                console.log(profile)
-                if (!profile){
-                    return res.status(404).send({ status: false, message: "Url Not Found!" })
-                }
-                await SET_ASYNC(`${req.params.urlCode}`, JSON.stringify(profile))
-                console.log(profile.longUrl)
-                res.redirect(302,profile.longUrl)
-                
-            }
-
-    }
-    catch (error) {
-        return res.status(500).send({ status: false, msg: error.message })
-    }
-};
+      try {
+          urlCode = req.params.urlCode
+          let url = await GET_ASYNC(`${urlCode}`)
+          if (url) {
+              res.redirect(302, JSON.parse(url))
+          } else {
+              let newURL = await urlModel.findOne({ urlCode: urlCode })
+               if (!newURL) return res.status(404).send({ status: false, msg: 'longUrl not found' })
+               console.log(newURL)
+              await SET_ASYNC(`${urlCode}`, JSON.stringify(newURL.longUrl))
+              res.redirect(302, newURL.longUrl)
+          }
+      }
+      catch (error) {
+          res.status(500).send({ status: false, msg: error.message })
+      }
+  }
 
 
-// vaishnavi
+// jai bhole ki
+
+
+// vaishnavi sharma..
