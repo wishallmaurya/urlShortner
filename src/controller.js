@@ -47,12 +47,16 @@ exports.createurl = async function (req, res) {
         const fixUrl = "http://localhost:3000/"
         const urlCode = shortId.generate()
         const shortUrl = fixUrl + urlCode
-
-        data.shortUrl = shortUrl
+        
         data.urlCode = urlCode
+        data.shortUrl = shortUrl
+        
 
         let savedData = await urlModel.create(data);
-        console.log(data)
+        savedData = savedData.toObject()
+        delete savedData.__v
+        delete savedData._id
+        console.log(savedData)
         res.status(201).send({ status: true, data: savedData});
     }
     catch (error) {
