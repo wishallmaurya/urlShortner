@@ -24,7 +24,7 @@ const GET_ASYNC = promisify(redisClient.GET).bind(redisClient);
 
 const isValid = function (value) {
     if (typeof value === "undefined" || value === null) return false;
-    if (typeof value === "string" && value.trim().length == 0) return false;
+    if (typeof value !== "string" || value.trim().length == 0) return false;
     return true;
 }
 exports.createurl = async function (req, res) {
@@ -35,7 +35,7 @@ exports.createurl = async function (req, res) {
         }
 
         if (!isValid(data.longUrl)) {
-            return res.status(400).send({ status: false, message: "write your longUrl its mandatory" })
+            return res.status(400).send({ status: false, message: "write your longUrl, its mandatory" })
         }
 
         if (!isUrlValid(data.longUrl.trim())) {
@@ -58,7 +58,6 @@ exports.createurl = async function (req, res) {
         savedData = savedData.toObject()
         delete savedData.__v
         delete savedData._id
-        console.log(savedData)
         res.status(201).send({ status: true, data: savedData });
     }
     catch (error) {
